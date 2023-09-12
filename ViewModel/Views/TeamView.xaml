@@ -1,0 +1,142 @@
+﻿<UserControl x:Class="ViewModel.Views.TeamView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:ViewModel.Views"
+             xmlns:viewModels="clr-namespace:ViewModel.ViewModels"
+             xmlns:interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
+             mc:Ignorable="d" 
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewModels:TeamViewModel}"
+             DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=TeamViewModel}"
+             Visibility="{Binding ActiveMember, Converter={StaticResource NullToVisibilityConverter}}">
+    <Border>
+        <Border.Background>
+            <LinearGradientBrush EndPoint="0.8,1" StartPoint="0.5,0">
+                <GradientStop Color="#00FF88" Offset="0"/>
+                <GradientStop Color="#0088FF" Offset="0.567"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="10*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ToggleButton Content="Nový tým" IsChecked="False" Margin="5" Name="ToggleForNewTeamVisibility"/>
+                <Grid Grid.Row="1" Visibility="{Binding IsChecked, ElementName=ToggleForNewTeamVisibility, Converter={StaticResource BooleanToVisibilityConverter}}" MinHeight="0" Height="{Binding IsChecked, ElementName=ToggleForNewTeamVisibility, Converter={StaticResource BooleanToSizeConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Název:" Grid.Row="0"/>
+                    <TextBox MaxLength="40" Text="{Binding NewTeam.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1"/>
+                    <ComboBox Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0"
+                          ItemsSource="{Binding PickableColors, Mode=OneWay}" SelectedItem="{Binding NewTeam.RGB, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Fill="{Binding Name}" Width="16" Height="16" Margin="0,2,5,2" />
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Content="Vytvoř tým!" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="0"
+                        Command="{Binding TeamCreatedCommand}" Margin="5"/>
+                </Grid>
+            </Grid>
+
+            <ListBox x:Name="TeamListBox" ItemsSource="{Binding Teams}" Grid.Row="1" Grid.Column="0"
+                     Background="Transparent">
+                <interactivity:Interaction.Triggers>
+                    <interactivity:EventTrigger EventName="SelectionChanged">
+                        <interactivity:InvokeCommandAction Command="{Binding TeamSelectedCommand}"
+                                                      CommandParameter="{Binding ElementName=TeamListBox, Path=SelectedItem}" />
+                    </interactivity:EventTrigger>
+                </interactivity:Interaction.Triggers>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <Label Content="{Binding Name}" Foreground="{Binding RGB, Converter={StaticResource ColorToBrushConverter}}"/>
+                            <Grid Visibility="{Binding IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem }}, Converter={StaticResource BooleanToVisibilityConverter}}" MinHeight="0" Height="{Binding IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem }}, Converter={StaticResource BooleanToSizeConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Button Content="  Opusit  " Margin="0,0,5,0" Command="{Binding DataContext.LeaveTeamCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}}" Visibility="{Binding DataContext.MembershipOfActiveMember.IsFounder, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}, Converter={StaticResource BooleanReversedToVisibilityConverter}}"/>
+                                <Button Content=" Smazat " Foreground="Red" FontWeight="Bold" Grid.Column="1" HorizontalAlignment="Right" Visibility="{Binding DataContext.CanDestroyTeam, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding DataContext.DestroyTeamCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}}"/>
+                            </Grid>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+
+            <Button Content="{Binding ActiveMember.Nickname}" ContentStringFormat="{}{0} - Profil" Grid.Row="2"
+                Grid.Column="0" Command="{Binding ShowProfileCommand}" Margin="2"/>
+            <local:PostCommentView Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"/>
+
+            <StackPanel Grid.Column="2" Grid.Row="0" Grid.RowSpan="3">
+                <Grid Visibility="{Binding CanEditTeam, Converter={StaticResource BooleanToVisibilityConverter}}" MinHeight="0" Height="{Binding CanEditTeam, Converter={StaticResource BooleanToSizeConverter}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Email:"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding NewMemberEmail, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Content="Přidej člena" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0"
+                            Command="{Binding AddMemberCommand}" Margin="5"/>
+                </Grid>
+                <ListBox x:Name="MemberListBox" ItemsSource="{Binding ActiveTeamMembers}"  Background="Transparent">
+                    <interactivity:Interaction.Triggers>
+                        <interactivity:EventTrigger EventName="SelectionChanged">
+                            <interactivity:InvokeCommandAction Command="{Binding MemberSelectedCommand}"
+                                                          CommandParameter="{Binding ElementName=MemberListBox, Path=SelectedItem}" />
+                        </interactivity:EventTrigger>
+                    </interactivity:Interaction.Triggers>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Label Content="{Binding Nickname}"/>
+                                <Grid Grid.Column="1" Visibility="{Binding DataContext.CanEditTeam, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button Content=" A " Foreground="DarkBlue" FontWeight="Bold" Command="{Binding DataContext.ChangeMemberAdminCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}}" CommandParameter="{Binding}" Height="20"/>
+                                    <Button Content=" ✗ " Foreground="Red" FontWeight="Bold" Grid.Column="1" HorizontalAlignment="Right" Command="{Binding DataContext.KickMemberFromTeamCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:TeamView}}}" CommandParameter="{Binding}" Height="20"/>
+                                </Grid>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

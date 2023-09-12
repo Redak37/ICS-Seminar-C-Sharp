@@ -1,0 +1,36 @@
+
+\.vs/ICS Projekt/v15/
+
+ICS Projekt\.sln\.DotSettings\.user
+
+ICS Projekt/obj/
+/ICS Projekt/bin/Debug/netcoreapp2.0
+/.vs
+
+Backend/obj/
+
+ViewModel/obj/
+
+Backend/bin/
+
+BLogic/obj/
+
+Data/bin/
+
+Data/obj/
+
+Data\.Tests/bin/
+
+Data\.Tests/obj/
+
+ViewModel/bin/
+
+BLogic/bin/
+
+BLogic\.Tests/bin/
+
+BLogic\.Tests/obj/
+
+ViewModel\.Tests/bin/
+
+ViewModel\.Tests/obj/

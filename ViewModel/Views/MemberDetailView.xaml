@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="ViewModel.Views.MemberDetailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModels="clr-namespace:ViewModel.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance viewModels:MemberDetailViewModel}"
+             DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=MemberDetailViewModel}"
+             Visibility="{Binding ViewedMember, Converter={StaticResource NullToVisibilityConverter}}"
+             >
+    <Border>
+        <Border.Background>
+            <LinearGradientBrush EndPoint="0.8,1" StartPoint="0.5,0">
+                <GradientStop Color="#00FF88" Offset="0"/>
+                <GradientStop Color="#0088FF" Offset="0.567"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="{Binding ViewedMember.Nickname}" ContentStringFormat="Profil uživatele {0}" FontSize="15" Grid.ColumnSpan="3" HorizontalAlignment="Center"/>
+            <Label Content="{Binding ViewedMember.FirstName}" ContentStringFormat="Jméno: {0}" Grid.Row="1" Grid.Column="0" />
+            <Label Content="{Binding ViewedMember.LastName}" ContentStringFormat="Příjmení: {0}" Grid.Row="2" Grid.Column="0" />
+            <Label Content="{Binding ViewedMember.Email}" ContentStringFormat="Email: {0}" Grid.Row="3" Grid.Column="0" />
+            <Label Content="{Binding ViewedMember.LastActionDate.Date}" ContentStringFormat="Datum poslední akce: {0}" Grid.Row="4"
+               Grid.Column="0" />
+
+            <Grid Grid.Row="5" Grid.Column="0"
+              Visibility="{Binding CanAdministrate, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Label Content="Nová přezdívka:"/>
+                <TextBox Text="{Binding NewNickname}" MaxLength="30" Grid.Row="0" Grid.Column="1"/>
+                <Button Content="Potvrdit" Grid.Row="1" Grid.Column="1" Command="{Binding ChangeNicknameCommand}"/>
+            </Grid>
+
+            <Button Content="Smazat profil" Grid.Row="7" Grid.Column="0" Foreground="Red" FontWeight="Bold" Visibility="{Binding CanAdministrate, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding DeleteProfileCommand}" Margin="2"/>
+            <Button Content="Odhlásit se" Grid.Row="7" Grid.Column="2" FontWeight="Bold" Visibility="{Binding IsThisMe, Converter={StaticResource BooleanToVisibilityConverter}}" Command="{Binding LogoutCommand}" Margin="2"/>
+            <Button Content="Zpět" Grid.Row="8" Grid.Column="2" Command="{Binding BackCommand}" Margin="2"/>
+        </Grid>
+    </Border>
+</UserControl>
